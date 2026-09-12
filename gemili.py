@@ -24,7 +24,7 @@ if "chats" not in st.session_state:
 if "current_chat_id" not in st.session_state:
     st.session_state.current_chat_id = None
 
-MODEL_NAME = st.secrets.get("GROQ_MODEL", "openai/gpt-oss-120b")
+MODEL_NAME = st.secrets.get("GROQ_MODEL", "groq/compound")
 
 
 def create_new_chat():
