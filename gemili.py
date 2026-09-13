@@ -1,30 +1,28 @@
 import uuid
-from groq import Groq
+from openai import OpenAI
 import streamlit as st
 
 st.set_page_config(page_title="AI chatbot xàm l", page_icon="🤖", layout="wide")
 
-# 1. Kiểm tra API Key
-if "GROQ_API_KEY" in st.secrets:
-    API_KEY = st.secrets["GROQ_API_KEY"]
+if "OPENAI_API_KEY" in st.secrets:
+    API_KEY = st.secrets["OPENAI_API_KEY"]
 else:
     st.error("NO API KEY FOUND")
     st.stop()
 
 try:
-    client = Groq(api_key=API_KEY)
+    client = OpenAI(api_key=API_KEY)
 except Exception as e:
     st.error(f"Lỗi khởi tạo API Client: {e}")
     st.stop()
 
-# 2. Quản lý danh sách chat
 if "chats" not in st.session_state:
     st.session_state.chats = {}
 
 if "current_chat_id" not in st.session_state:
     st.session_state.current_chat_id = None
 
-MODEL_NAME = st.secrets.get("GROQ_MODEL", "openai/gpt-oss-120b")
+MODEL_NAME = st.secrets.get("OPENAI_MODEL", "gpt-4o-mini")
 
 
 def create_new_chat():
@@ -46,7 +44,6 @@ def ensure_valid_chat():
 
 ensure_valid_chat()
 
-# 3. Sidebar
 with st.sidebar:
     st.title("💬 Danh sách Chat")
 
@@ -81,19 +78,16 @@ with st.sidebar:
                 ensure_valid_chat()
                 st.rerun()
 
-# 4. Giao diện chính
-st.title("🤖 Chat với AI (via Groq)")
+st.title("🤖 Chat với AI (via OpenAI)")
 st.caption("AI đỉnh cao ko đến từ vùng đất 36 mà từ vùng đất 88")
 
 ensure_valid_chat()
 current_chat = st.session_state.chats[st.session_state.current_chat_id]
 
-# Render lịch sử tin nhắn
 for message in current_chat["messages"]:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Xử lý khi gửi câu hỏi
 if prompt := st.chat_input("Nhập câu hỏi của bạn tại đây..."):
     is_first_msg = len(current_chat["messages"]) == 0
     if is_first_msg:
@@ -120,9 +114,8 @@ if prompt := st.chat_input("Nhập câu hỏi của bạn tại đây..."):
                     {"role": "assistant", "content": answer}
                 )
 
-                # Chỉ rerun khi gửi tin nhắn đầu tiên để đổi tên sidebar
                 if is_first_msg:
                     st.rerun()
 
             except Exception as e:
-                st.error(f"Lỗi Groq API: {e}")
+                st.error(f"Lỗi OpenAI API: {e}")
